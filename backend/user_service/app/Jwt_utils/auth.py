@@ -1,9 +1,10 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import jwt  
+from jose import jwt
+
 import os
 from datetime import datetime, timedelta
-from jose import jwt
+
 
 
 SECRET_KEY = os.getenv("JWT_SECRET")
