@@ -17,4 +17,4 @@ def serialize_user(user: dict) -> dict:
         "email": user["email"],
         "name": user.get("name"),
         "picture": user.get("picture")
-    }
+    } 

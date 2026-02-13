@@ -4,9 +4,11 @@ from app.crud import get_user_by_google_id, create_user, serialize_user
 from app.schemas import GoogleAuthRequest, UserResponse, AuthResponse
 from app.auth.jwt import create_access_token
 
-router = APIRouter()
+auth_router = APIRouter()
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/auth/google", response_model=AuthResponse)
+
+@auth_router.post("/google/auth", response_model=AuthResponse)
 async def google_auth(payload: GoogleAuthRequest):
     user_data = verify_google_token(payload.token)
 
@@ -25,3 +27,7 @@ async def google_auth(payload: GoogleAuthRequest):
         "access_token": token,
         "user": serialized_user
     }
+    
+    
+    
+    

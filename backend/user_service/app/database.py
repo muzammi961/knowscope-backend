@@ -13,3 +13,4 @@ db = client[DB_NAME]
 
 # example collection
 users_collection = db["users"]
+student_collection = db["students"] 
