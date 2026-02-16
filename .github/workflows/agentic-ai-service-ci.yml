@@ -1,15 +1,15 @@
-name: User Service CI
+name: Agentic AI Service CI
 
 on:
   pull_request:
     branches: [developer]
     paths:
-      - 'backend/user_service/**'
+      - 'backend/agentic_ai_service/**'
 
   push:
     branches: [developer]
     paths:
-      - 'backend/user_service/**'
+      - 'backend/agentic_ai_service/**'
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: backend/user_service
+        working-directory: backend/agentic_ai_service
 
     steps:
       - name: Checkout code
@@ -38,4 +38,4 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker Image
-        run: docker build -t user_service:latest .
+        run: docker build -t agentic-ai-service:latest .
