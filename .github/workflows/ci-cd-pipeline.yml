@@ -1,0 +1,149 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master", "developer" ]
+  pull_request:
+    branches: [ "master", "developer" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  ECS_CLUSTER: knowscope-cluster
+  USER_ECR: knowscope/user-service
+  AI_ECR: knowscope/agentic-ai-service
+  CONTENT_ECR: knowscope/content-service
+
+jobs:
+
+  #  CI - BUILD & TEST
+  ci-build-test:
+    name: Build and Test Services
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [user_service, agentic_ai_service, content_service]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: Install dependencies & Syntax Check
+        working-directory: backend/${{ matrix.service }}
+        run: |
+          pip install -r requirements.txt
+          python -m py_compile app/main.py
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Image (CI validation only)
+        uses: docker/build-push-action@v5
+        with:
+          context: backend/${{ matrix.service }}
+          push: false
+          tags: ${{ matrix.service }}:ci-test
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  #  CD - PUSH & DEPLOY
+  cd-deploy-aws:
+    name: Deploy to AWS ECS
+    needs: [ci-build-test]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          build_and_push () {
+            local dir=$1
+            local repo=$2
+            docker build -t $ECR_REGISTRY/$repo:$IMAGE_TAG -t $ECR_REGISTRY/$repo:latest "$dir"
+            docker push $ECR_REGISTRY/$repo:$IMAGE_TAG
+            docker push $ECR_REGISTRY/$repo:latest
+          }
+
+          build_and_push backend/user_service $USER_ECR
+          build_and_push backend/agentic_ai_service $AI_ECR
+          build_and_push backend/content_service $CONTENT_ECR
+
+      #  DEPLOY USER SERVICE
+      - name: Render User Task Definition
+        id: task-def-user
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs/user-task-def.json
+          container-name: user-service-container
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.USER_ECR }}:${{ github.sha }}
+
+      - name: Deploy User Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-user.outputs.task-definition }}
+          service: user-service-service-4hbvc4nq
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      # 🚀 DEPLOY AGENTIC AI SERVICE
+      - name: Render Agentic AI Task Definition
+        id: task-def-ai
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs/ai-task-def.json
+          container-name: agentic-ai-service-container
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.AI_ECR }}:${{ github.sha }}
+
+      - name: Deploy Agentic AI Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-ai.outputs.task-definition }}
+          service: agentic-ai-service-service-dwba3nnn
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      #  DEPLOY CONTENT SERVICE
+      - name: Render Content Task Definition
+        id: task-def-content
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs/content-task-def.json
+          container-name: content-service-container
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.CONTENT_ECR }}:${{ github.sha }}
+
+      - name: Deploy Content Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-content.outputs.task-definition }}
+          service: content-service-service-hr0po0jo
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true

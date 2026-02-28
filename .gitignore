@@ -1,0 +1,8 @@
+WiredTiger*
+*.wt
+*.lock
+journal/
+diagnostic.data/
+_tmp/
+mongod.lock
+mongod.log

@@ -1,0 +1,171 @@
+# # Python
+# __pycache__/
+# *.py[cod]
+# *$py.class
+# *.so
+
+# # Virtual Environment
+# venv/
+# .venv/
+# content_venv/
+# ENV/
+
+# # Environment Variables
+# .env
+# .env.*
+# *.env
+
+# # IDE / Editor
+# .vscode/
+# .idea/
+# *.swp
+# *.swo
+
+# # Logs
+# *.log
+# logs/
+
+# # Database / Local Data
+# *.sqlite3
+# *.db
+
+# # MongoDB local files
+# WiredTiger*
+# _mdb_catalog.wt
+# journal/
+# diagnostic.data/
+# storage.bson
+# *.wt
+# *.lock
+
+# # Sentence Transformers Cache
+# .cache/
+# huggingface/
+# *.pt
+# *.bin
+# *.model
+
+# # OS Files
+# .DS_Store
+# Thumbs.db
+
+# # Build / Distribution
+# build/
+# dist/
+# *.egg-info/
+# .eggs/
+
+# # Testing / Coverage
+# .pytest_cache/
+# .coverage
+# htmlcov/
+
+# # Jupyter Notebooks
+# .ipynb_checkpoints/
+
+# # Optional test outputs
+# *.txt
+
+
+
+
+######################################
+# PYTHON
+######################################
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+
+######################################
+# VIRTUAL ENVIRONMENTS
+######################################
+venv/
+.venv/
+ENV/
+env/
+content_venv/
+user_venv/
+
+######################################
+# ENVIRONMENT VARIABLES
+######################################
+.env
+.env.*
+*.env
+
+######################################
+# IDE / EDITOR
+######################################
+.vscode/
+.idea/
+*.swp
+*.swo
+
+######################################
+# LOG FILES
+######################################
+*.log
+logs/
+
+######################################
+# DATABASE FILES
+######################################
+*.sqlite3
+*.db
+
+######################################
+# MONGODB LOCAL STORAGE (IMPORTANT)
+######################################
+WiredTiger*
+*.wt
+*.lock
+_mdb_catalog.wt
+journal/
+diagnostic.data/
+storage.bson
+mongod.log
+mongod.lock
+
+######################################
+# AI / ML CACHE (HUGGINGFACE, MODELS)
+######################################
+.cache/
+huggingface/
+*.pt
+*.bin
+*.model
+
+######################################
+# BUILD / DISTRIBUTION
+######################################
+build/
+dist/
+*.egg-info/
+.eggs/
+
+######################################
+# TESTING / COVERAGE
+######################################
+.pytest_cache/
+.coverage
+htmlcov/
+
+######################################
+# JUPYTER
+######################################
+.ipynb_checkpoints/
+
+######################################
+# OS FILES
+######################################
+.DS_Store
+Thumbs.db
+
+######################################
+# TEMP FILES
+######################################
+_tmp/
+*.txt
