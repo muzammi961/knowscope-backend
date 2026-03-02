@@ -1,34 +1,32 @@
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends, HTTPException
-from jose import jwt, JWTError, ExpiredSignatureError
+# shared/jwt_utils.py
 import os
+from datetime import datetime, timedelta
+from jose import jwt, JWTError, ExpiredSignatureError, JWSError
+from dotenv import load_dotenv
 
-security = HTTPBearer()
+load_dotenv()
 
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
+
+
+def create_access_token(data: dict, expires_minutes: int = 60):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("user_id")
-        role = payload.get("role")
-        if not user_id or not role:
+        if not user_id:
             raise JWTError("Invalid token payload")
-        return {"user_id": user_id,"email": payload.get("email"),"role": role}
+        return {"user_id": user_id, "email": payload.get("email")}
     except ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-
-async def get_current_user_from_header(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
-    return decode_access_token(token)
-
-
-def require_admin(current_user: dict = Depends(get_current_user_from_header)):
-    if current_user["role"] != "admin":
-        raise HTTPException(status_code=403,detail="Admin access required")
-    return current_user
+        raise JWTError("Token expired")
+    except JWSError:
+        raise JWTError("Signature verification failed")
+    except JWTError as e:
+        raise JWTError(f"Invalid token: {str(e)}")

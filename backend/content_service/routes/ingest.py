@@ -18,30 +18,32 @@ from services.chapter_pipeline import build_chapters
 from services.topic_extractor import build_topics
 from services.chunk_builder import build_chunks
 from app.vector_store import vector_store
-from fastapi import APIRouter, UploadFile, File, Form,Header,Depends
-from .jwt_utils import get_current_user_from_header ,require_admin
 
-router = APIRouter(prefix="/vectordb", tags=["vectordb"])
+router = APIRouter(prefix="/ingest", tags=["Ingestion"])
 
 
 # ─────────────────────────────────────────────
 # POST /ingest/pdf
 # ─────────────────────────────────────────────
 
-@router.post("/storpdf_forembedding")
+@router.post("/pdf")
 async def ingest_pdf(
     file: UploadFile = File(...),
-    # book_id: str = Form(...),
+    book_id: str = Form(...),
     class_number: int = Form(...),
-    subject: str = Form(...),
-    # current_admin: dict = Depends(require_admin)
+    subject: str = Form(...)
 ):
-    last_doc = await raw_pages_collection.find_one({},sort=[("book_id", -1)])
+    """
+    Upload a PDF textbook and run the full ingestion pipeline:
+    extract pages → clean text → build chapters → build topics → build chunks → store embeddings.
 
-    if last_doc:
-        book_id=last_doc["book_id"] + 1
-    else:
-        book_id=0
+    Fields:
+    - **file**: PDF file to upload
+    - **book_id**: Unique identifier for this book (e.g. "physics_class10")
+    - **class_number**: Class/grade number (e.g. 10)
+    - **subject**: Subject name (e.g. "physics", "biology")
+    """
+    # ── Duplicate check ──────────────────────────────────────────────────────
     existing = await raw_pages_collection.find_one({"book_id": book_id})
     if existing:
         raise HTTPException(
@@ -95,9 +97,7 @@ async def ingest_pdf(
         "subject": subject,
         "pages_extracted": len(pages),
         "chapters_created": len(chapters),
-        "total_chunks_indexed": total_chunks,
-        # "uploaded_by": current_admin["user_id"]
-        
+        "total_chunks_indexed": total_chunks
     }
 
 

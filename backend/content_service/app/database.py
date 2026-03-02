@@ -15,14 +15,3 @@ raw_pages_collection = db["raw_pages"]
 chapters_collection = db["chapters"]
 topics_collection = db["topics"]
 chunks_collection = db["chunks"]
-
-
-
-users_collection = db["users"]               
-conversations_collection = db["conversations"]  
-messages_collection = db["messages"]   
-
-
-
-# textbook pdf
-textbook_collection = db["textbooks"]

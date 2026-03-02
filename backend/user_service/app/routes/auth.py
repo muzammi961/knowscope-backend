@@ -1,13 +1,61 @@
+<<<<<<< HEAD
+# from fastapi import APIRouter
+# from app.auth.google import verify_google_token
+# from app.crud import get_user_by_google_id, create_user, serialize_user
+# from app.schemas import GoogleAuthRequest, UserResponse, AuthResponse
+# from app.auth.jwt import create_access_token
+
+# auth_router = APIRouter()
+# auth_router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+# @auth_router.post("/google/auth", response_model=AuthResponse)
+# async def google_auth(payload: GoogleAuthRequest):
+#     user_data = verify_google_token(payload.token)
+
+#     user = await get_user_by_google_id(user_data["google_id"])
+#     if not user:
+#         user = await create_user(user_data)
+
+#     serialized_user = serialize_user(user)
+
+#     token = create_access_token({
+#         "user_id": serialized_user["id"],
+#         "email": serialized_user["email"]
+#     })
+
+#     return {
+#         "access_token": token,
+#         "user": serialized_user
+#     }
+    
+    
+    
+    
+    
+import os
+from datetime import datetime, timedelta
+from jose import jwt
+from dotenv import load_dotenv
+from fastapi import APIRouter, HTTPException
+=======
 import os
 from datetime import datetime, timedelta
 from jose import jwt, JWTError ,ExpiredSignatureError
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException ,Depends ,Body,Header
 from .jwt_handler import get_current_user
+>>>>>>> upstream/developer
 
 from app.auth.google import verify_google_token
 from app.crud import get_user_by_google_id, create_user, serialize_user
 from app.schemas import GoogleAuthRequest, AuthResponse
+<<<<<<< HEAD
+from .jwt_handler import create_access_token
+
+# Load .env
+load_dotenv()
+=======
 from fastapi.security import HTTPAuthorizationCredentials,HTTPBearer
 from .jwt_handler import create_access_token
 from app.database import users_collection,blacklist_collection
@@ -27,6 +75,7 @@ async def get_user_from_header(authorization: str = Header(...)):
     
     
 
+>>>>>>> upstream/developer
 
 SECRET_KEY = os.getenv("JWT_SECRET")
 ALGORITHM = os.getenv("JWT_ALGORITHM")
@@ -46,6 +95,14 @@ async def google_auth(payload: GoogleAuthRequest):
 
     serialized_user = serialize_user(user)
     
+<<<<<<< HEAD
+    token = create_access_token({
+        "user_id": serialized_user["id"],
+        "email": serialized_user["email"]
+    })
+    
+    return {"access_token": token, "user": serialized_user}    
+=======
     access_token = create_access_token({
         "user_id": serialized_user["id"],
         "email": serialized_user["email"],
@@ -111,3 +168,4 @@ async def get_recent_users(limit: int = 10):
     async for user in cursor:
         users.append(serialize_user(user))
     return users
+>>>>>>> upstream/developer

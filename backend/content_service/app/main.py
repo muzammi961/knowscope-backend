@@ -12,10 +12,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.ingest import router as ingest_router
 from routes.qa import router as qa_router
-from routes.syllabusrout import router as syllabus_router
-from fastapi.staticfiles import StaticFiles
-import os
-
 
 
 @asynccontextmanager
@@ -53,33 +49,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # project root
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-app.include_router(syllabus_router)
-
-
 # Include routers
 app.include_router(ingest_router)
 app.include_router(qa_router)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @app.get("/", tags=["Health"])
