@@ -34,6 +34,7 @@ async def generate_mcq(request: MCQRequest):
             difficulty=request.difficulty,
             num_questions=request.num_questions,
             top_k=request.top_k,
+            class_level=request.class_level,
         )
 
         quiz_id = await save_quiz(

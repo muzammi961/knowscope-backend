@@ -38,7 +38,7 @@ async def create_student(
     class_number: int = Form(...),
     medium: str = Form(...),
     image: Optional[UploadFile] = None,
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_user_from_header),
     learningstyle:str=Form(...)
 ):
     image_name = await save_image(image) if image else None

@@ -61,7 +61,6 @@ async def get_user_conversations(user_id: str):
     conv_list = []
     async for conv in conv_cursor:
         conv_list.append({"conversation_id": str(conv["_id"]),"title": conv.get("title", ""),"created_at": conv.get("created_at", datetime.utcnow())})
-        print(conv_list)
     return conv_list
 
 

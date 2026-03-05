@@ -10,7 +10,8 @@ async def run_mcq_pipeline(subject: str,
                            topic: str | None,
                            difficulty: str,
                            num_questions: int = 20,
-                           top_k: int = 6):
+                           top_k: int = 6,
+                           class_level: str | None = None):
     """
     Full MCQ generation pipeline enforcing exactly N questions and batched LLM calls.
     """
@@ -20,7 +21,8 @@ async def run_mcq_pipeline(subject: str,
         subject=subject,
         topic=topic,
         difficulty=difficulty,
-        num_questions=num_questions
+        num_questions=num_questions,
+        class_level=class_level
     )
 
     # 2️⃣ Retrieve grounded answers
