@@ -12,7 +12,7 @@ from bson import ObjectId
 
 
 
-router = APIRouter(prefix="/api/qa", tags=["Question Answering"])
+router = APIRouter(prefix="/api/a", tags=["Question Answering"])
 
 async def get_current_user_from_header(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
@@ -24,12 +24,6 @@ async def get_current_user_from_header(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail=str(e))
     
     
-
-@router.get("/me")
-async def read_my_profile(current_user: dict = Depends(get_current_user_from_header)):
-    # current_user = {'user_id': ..., 'email': ...}
-    return {"message": "Current user fetched successfully", "user": current_user}
-
 
 
 
@@ -68,13 +62,24 @@ class SearchResponse(BaseModel):
 router = APIRouter(prefix="/api/qa", tags=["QA"])
 
 # Dummy auth dependency (replace with your JWT auth)
-async def get_current_user_from_header():
-    # Example hardcoded user, replace with JWT decoding
-    return {"user_id": "user123", "email": "user@example.com"}
+# async def get_current_user_from_header():
+#     # Example hardcoded user, replace with JWT decoding
+#     return {"user_id": "user123", "email": "user@example.com"}
 
-# --------------------------
+# # --------------------------
 # Ask question endpoint
 # --------------------------
+
+
+@router.get("/me")
+async def read_my_profile(current_user: dict = Depends(get_current_user_from_header)):
+    # current_user = {'user_id': ..., 'email': ...}
+    return {"message": "Current user fetched successfully", "user": current_user}
+
+
+
+
+
 @router.post("/ask", response_model=MessageResponse)
 async def ask_question(request: QuestionRequest, current_user: dict = Depends(get_current_user_from_header)):
     from services.rag_graph import rag_graph  # Your LangGraph pipeline
