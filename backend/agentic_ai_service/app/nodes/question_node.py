@@ -8,15 +8,17 @@ from app.utils.json_parser import safe_json_parse
 async def generate_concept_questions(subject: str,
                                      topic: str | None,
                                      difficulty: str,
-                                     num_questions: int):
+                                     num_questions: int,
+                                     class_level: str | None = None):
     """
     Generate conceptual questions in batches to avoid rate limits.
     """
+    class_instruction = f"Target Level: {class_level}" if class_level else ""
     if topic:
-        focus_instruction = f"Focus strictly on the topic: {topic}. Output '{topic}' as the topic_id."
+        focus_instruction = f"Focus strictly on the topic: {topic}. {class_instruction} Output '{topic}' as the topic_id."
     else:
         focus_instruction = (
-            "Distribute questions across different important topics "
+            f"Distribute questions across different important topics {class_instruction} "
             "from the subject syllabus. Output the specific topic as topic_id."
         )
 

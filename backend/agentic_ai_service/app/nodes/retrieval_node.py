@@ -7,12 +7,13 @@ from app.core.llm import get_llm
 from app.utils.json_parser import safe_json_parse
 
 
-async def _fallback_generate_answer(question_text: str, subject: str, topic: str | None) -> str:
+async def _fallback_generate_answer(question_text: str, subject: str, topic: str | None, class_level: str | None = None) -> str:
     """Generate an answer directly from the LLM without RAG if retrieval fails."""
     llm = get_llm(temperature=0.3)
     topic_str = f" on the topic of {topic}" if topic else ""
+    class_str = f" for {class_level}" if class_level else ""
     prompt = f"""
-You are an expert in {subject}{topic_str}.
+You are an expert in {subject}{topic_str}{class_str}.
 Provide a concise, accurate factual answer to the following question.
 
 Question: {question_text}
@@ -49,7 +50,8 @@ async def _retrieve_single(question: dict,
                            subject: str,
                            topic: str | None,
                            top_k: int,
-                           max_retries: int = 2):
+                           max_retries: int = 2,
+                           class_level: str | None = None):
     """
     Retrieve grounded answer for a single question.
     Retry max 2 times if confidence < threshold.
@@ -100,7 +102,7 @@ async def _retrieve_single(question: dict,
 
     # If RAG fails entirely, fallback to zero-shot generation
     print(f"RAG failed for: {q_text}. Generating fallback answer directly...")
-    fallback_answer = await _fallback_generate_answer(q_text, subject, topic)
+    fallback_answer = await _fallback_generate_answer(q_text, subject, topic, class_level)
     
     if fallback_answer:
         return {
@@ -117,7 +119,8 @@ async def retrieve_valid_questions(questions: list,
                                    subject: str,
                                    topic: str | None,
                                    top_k: int = 4,
-                                   required_count: int = 20):
+                                   required_count: int = 20,
+                                   class_level: str | None = None):
     """
     Runs retrieval in parallel and returns only valid grounded questions.
     Batches execution to avoid hitting rate limits on the external service or our LLM fallbacks.
@@ -129,7 +132,7 @@ async def retrieve_valid_questions(questions: list,
     for i in range(0, len(questions), batch_size):
         batch = questions[i:i + batch_size]
         tasks = [
-            _retrieve_single(q, subject, topic, top_k)
+            _retrieve_single(q, subject, topic, top_k, class_level=class_level)
             for q in batch
         ]
         
